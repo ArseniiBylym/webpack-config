@@ -1,9 +1,10 @@
 const path = require('path');
 const webpack = require('webpack');
 const merge = require('webpack-merge');
+const { DefinePlugin } = webpack;
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const CleanWebpackPlugin = require('clean-webpack-plugin')
+const CleanWebpackPlugin = require('clean-webpack-plugin');
 
 var SCRIPT = process.env.npm_lifecycle_event;
 
@@ -17,7 +18,7 @@ var common = {
 	},
 
 	resolve: {
-		extensions: [`.js`, `.jsx`, `.json`, `.css`, `.styl`]
+		extensions: [`.js`, `.jsx`, `.json`, `.css`, `.scss`, `sass`]
 	},
 
 	module: {
@@ -27,12 +28,12 @@ var common = {
 				use: ['html-loader']
 			},
 			{
-				test: /\.js$/,
+				test: /\.jsx?$/,
 				exclude: /node_modules/,
 				use: {
 					loader: "babel-loader",
 					options: {
-						presets: ["env", "react"]
+						presets: ["minify", "env", "react"]
 					}
 				}
 			},
@@ -47,21 +48,37 @@ var common = {
 						publicPath: 'img/'
 					}
 				}
-			}
+			},
+			{
+				test: /\.woff2?$/i,
+				include: /src\/fonts/,
+				exclude: /node_modules/,
+				loader: `url-loader`,
+				options: {
+				  limit: 10000,
+				  name: `fonts/[name].[hash:7].[ext]`
+				}
+			  },
+			  {
+				test: /\.(mp4|ogg|webm|mpeg|pdf)$/i,
+				include: /src\/img/,
+				exclude: /node_modules/,
+				loader: `file-loader`,
+			  }
 		]
 	},
 
 	plugins: [
 		new CleanWebpackPlugin(['dist']),
 		new HtmlWebpackPlugin({
+			title: 'Webpack test',
 			template: 'src/index.html',
-			title: 'Webpack test'
 		}),
 	]
 }
 
 if (SCRIPT == 'start') {
-	
+
 	module.exports = merge(common, {
 
 		devtool: "source-map",
@@ -93,7 +110,18 @@ if (SCRIPT == 'start') {
 						{
 							loader: 'css-loader',
 							options: {
+								importLoaders: 2,
 								sourceMap: true
+							}
+						},
+						{
+							loader: `postcss-loader`,
+							options: {
+							  sourceMap: true,
+							  ident: 'postcss',
+							  plugins: [
+								  require('autoprefixer')()
+							  ]
 							}
 						},
 						{
@@ -102,7 +130,12 @@ if (SCRIPT == 'start') {
 					]
 				},
 			]
-		}
+		},
+		plugins: [
+			new DefinePlugin({
+				DEV: JSON.stringify(true)
+			})
+		]
 
 
 	});
