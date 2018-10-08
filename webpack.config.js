@@ -33,7 +33,14 @@ var common = {
 				use: {
 					loader: "babel-loader",
 					options: {
-						presets: ["minify", "env", "react"]
+						presets: [
+							[
+								"@babel/preset-env",
+								{
+									"useBuiltIns": "entry"
+								}
+							], 
+							"@babel/preset-react"]
 					}
 				}
 			},
@@ -81,7 +88,7 @@ if (SCRIPT == 'start') {
 
 	module.exports = merge(common, {
 
-		devtool: "source-map",
+		devtool: "cheap-module-eval-source-map",
 		mode: "development",
 
 		optimization: {
@@ -133,7 +140,7 @@ if (SCRIPT == 'start') {
 		},
 		plugins: [
 			new DefinePlugin({
-				DEV: JSON.stringify(true)
+				DEV: JSON.stringify(true) 
 			})
 		]
 
@@ -157,7 +164,22 @@ if(SCRIPT == 'build') {
 					test: /\.s?css$/,
 					use: [
 						MiniCssExtractPlugin.loader,
-						'css-loader',
+						{
+							loader: 'css-loader',
+							options: {
+								importLoaders: 2,
+							}
+						},
+						{
+							loader: `postcss-loader`,
+							options: {
+							  sourceMap: true,
+							  ident: 'postcss',
+							  plugins: [
+								  require('autoprefixer')()
+							  ]
+							}
+						},
 						'sass-loader'
 					]
 				},
