@@ -1,100 +1,141 @@
 const path = require('path');
 const webpack = require('webpack');
+const merge = require('webpack-merge');
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CleanWebpackPlugin = require('clean-webpack-plugin')
 
-module.exports = {
+var SCRIPT = process.env.npm_lifecycle_event;
 
-    entry: './src/js/index.js',
-    output: {
-        path: path.resolve(__dirname, 'dist'),
-        filename: 'bundle.js',
-        // publicPath: '/dist'
-    },
+var common = {
 
-    devtool: "source-map",
+	entry: './src/js/index.js',
+	output: {
+		path: path.resolve(__dirname, 'dist'),
+		filename: 'bundle.js',
+		// publicPath: '/dist'
+	},
 
-    resolve: {
-        extensions: [`.js`, `.jsx`, `.json`, `.css`, `.styl`]
-    },
+	resolve: {
+		extensions: [`.js`, `.jsx`, `.json`, `.css`, `.styl`]
+	},
 
-    mode: "development",
+	module: {
+		rules: [
+			{
+				test: /\.html$/,
+				use: ['html-loader']
+			},
+			{
+				test: /\.js$/,
+				exclude: /node_modules/,
+				use: {
+					loader: "babel-loader",
+					options: {
+						presets: ["env", "react"]
+					}
+				}
+			},
+			{
+				test: /\.(img|jpe?g|svg|png)$/,
+				use: {
+					loader: 'url-loader',
+					options: {
+						limit: 10000,
+						name: '[name].[ext]',
+						outputPath: 'img/',
+						publicPath: 'img/'
+					}
+				}
+			}
+		]
+	},
 
-    devServer: {
-        compress: false,
-        contentBase: path.join(__dirname, 'dist'),
-        historyApiFallback: true,
-        noInfo: true,
-        // hot: true,
-        open: true,
-        overlay: {
-            warnings: true,
-            errors: true
-          },
-        port: 8080
-    },
+	plugins: [
+		new CleanWebpackPlugin(['dist']),
+		new HtmlWebpackPlugin({
+			template: 'src/index.html',
+			title: 'Webpack test'
+		}),
+	]
+}
 
-    optimization: {
-        minimize: false,  //optimization set to true by default 
-    },
+if (SCRIPT == 'start') {
+	
+	module.exports = merge(common, {
 
-    module: {
-        rules: [
-            {
-                test: /\.html$/,
-                use: ['html-loader']
-            },
-            {
-                test: /\.js$/,
-                exclude: /node_modules/,
-                use: {
-                  loader: "babel-loader"
-                }
-            },
-            {
-                test: /\.s?css$/,
-                use: [
-                    // {loader: 'style-loader'},
-                    MiniCssExtractPlugin.loader,
-                    {
-                        loader: 'css-loader',
-                        options:{
-                            sourceMap: true
-                        }
-                    },
-                    {
-                        loader: 'sass-loader',
-                    }
-                ]
-            },
-            {
-                test: /\.(img|jpe?g|svg|png)$/,
-                use: {
-                    loader: 'url-loader',
-                    options: {
-                        limit: 10000,
-                        name: '[name].[ext]',
-                        outputPath: 'img/',
-                        publicPath: 'img/'
-                    }
-                }
-            }
-        ]
-    },
+		devtool: "source-map",
+		mode: "development",
 
-    plugins: [
-        new CleanWebpackPlugin(['dist']),
-        new MiniCssExtractPlugin({
-          filename: "style.css",
-          chunkFilename: "[id].css"
-        }),
-        new HtmlWebpackPlugin({
-            template: 'src/index.html',
-            title: 'Webpack test'
-        }),
-        // new webpack.HotModuleReplacementPlugin({
+		optimization: {
+			minimize: false,  //optimization set to true by default 
+		},
 
-        // })
-      ]
+		devServer: {
+			compress: false,
+			contentBase: path.join(__dirname, 'dist'),
+			historyApiFallback: true,
+			noInfo: true,
+			open: true,
+			overlay: {
+				warnings: true,
+				errors: true
+			},
+			port: 8080
+		},
+
+		module: {
+			rules: [
+				{
+					test: /\.s?css$/,
+					use: [
+						{ loader: 'style-loader' },
+						{
+							loader: 'css-loader',
+							options: {
+								sourceMap: true
+							}
+						},
+						{
+							loader: 'sass-loader',
+						}
+					]
+				},
+			]
+		}
+
+
+	});
+}
+
+if(SCRIPT == 'build') {
+
+	module.exports = merge(common, {
+
+		mode: "production",
+		
+		optimization: {
+			minimize: true,  //optimization set to true by default 
+		},
+		
+		module: {
+			rules: [
+				{
+					test: /\.s?css$/,
+					use: [
+						MiniCssExtractPlugin.loader,
+						'css-loader',
+						'sass-loader'
+					]
+				},
+			]
+		},
+
+		plugins: [
+			new MiniCssExtractPlugin({
+				filename: "style.css",
+				chunkFilename: "[id].css"
+			}),
+		]
+	})
 }

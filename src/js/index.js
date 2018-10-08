@@ -9,14 +9,3 @@ const sayHello = () => {
 sayHello();
 console.log('helllooretrefoo')
 ReactDOM.render(<App/>, document.getElementById('app'));
-
-// class Hello extends React.Component {
-//     render() {
-//       return React.createElement('div', null, `Hello ${this.props.toWhat}`);
-//     }
-//   }
-  
-//   ReactDOM.render(
-//     React.createElement(Hello, {toWhat: 'REact'}, null),
-//     document.getElementById('app')
-//   );
