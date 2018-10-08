@@ -12,26 +12,33 @@ module.exports = {
         filename: 'bundle.js',
         // publicPath: '/dist'
     },
+
     devtool: "source-map",
-    // resolve: {
-    //     extensions: [`.js`, `.jsx`, `.json`, `.css`, `.styl`]
-    // },
-    // devServer: {
-    //     compress: false,
-    //     contentBase: 'dist/',
-    //     historyApiFallback: true,
-    //     noInfo: true,
-    //     hot: true,
-    //     open: true,
-    //     overlay: {
-    //         warnings: true,
-    //         errors: true
-    //       },
-    //     port: 8080
-    // },
+
+    resolve: {
+        extensions: [`.js`, `.jsx`, `.json`, `.css`, `.styl`]
+    },
+
+    mode: "development",
+
+    devServer: {
+        compress: false,
+        contentBase: path.join(__dirname, 'dist'),
+        historyApiFallback: true,
+        noInfo: true,
+        // hot: true,
+        open: true,
+        overlay: {
+            warnings: true,
+            errors: true
+          },
+        port: 8080
+    },
+
     optimization: {
         minimize: false,  //optimization set to true by default 
     },
+
     module: {
         rules: [
             {
@@ -40,14 +47,10 @@ module.exports = {
             },
             {
                 test: /\.js$/,
-                include: /src\.\/js/,
                 exclude: /node_modules/,
                 use: {
-                    loader: 'babel-loader',
-                    options: {
-                      presets: ['react']
-                    }
-                  }
+                  loader: "babel-loader"
+                }
             },
             {
                 test: /\.s?css$/,
@@ -79,18 +82,19 @@ module.exports = {
             }
         ]
     },
+
     plugins: [
         new CleanWebpackPlugin(['dist']),
         new MiniCssExtractPlugin({
-          // Options similar to the same options in webpackOptions.output
-          // both options are optional
           filename: "style.css",
           chunkFilename: "[id].css"
         }),
         new HtmlWebpackPlugin({
             template: 'src/index.html',
             title: 'Webpack test'
-        })
+        }),
+        // new webpack.HotModuleReplacementPlugin({
 
+        // })
       ]
 }
